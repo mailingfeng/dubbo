@@ -142,9 +142,12 @@ public class Providers extends Restful {
         }
 
         Cookie _cookie = new Cookie("HISTORY", newCookiev);
-        _cookie.setMaxAge(60 * 60 * 24 * 7); // 设置Cookie的存活时间为30分钟
+        _cookie.setMaxAge(60 * 60 * 24 * 7);  // 7 days lifetime
         _cookie.setPath("/");
-        response.addCookie(_cookie); // 写入客户端硬盘
+        _cookie.setSecure(true);              // Only sent over HTTPS
+        _cookie.setHttpOnly(true);            // Prevent client-side access
+        response.setHeader("Set-Cookie", _cookie.getName() + "=" + _cookie.getValue() + "; SameSite=Strict");          // Protect against CSRF
+        response.addCookie(_cookie);
     }
 
     public void show(Long id, Map<String, Object> context) {
