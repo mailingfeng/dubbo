@@ -25,9 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,6 +38,11 @@ import java.util.regex.Pattern;
 public class AuthorizationValve extends AbstractValve {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationValve.class);
+    private static final Set<String> SAFE_REDIRECT_PATHS = new HashSet<>(Arrays.asList(
+        "/",
+        "/login",
+        "/dashboard"
+    ));
     private static final String BASIC_CHALLENGE = "Basic";
     private static final String DIGEST_CHALLENGE = "Digest";
     private static final String CHALLENGE = BASIC_CHALLENGE;
@@ -71,6 +74,16 @@ public class AuthorizationValve extends AbstractValve {
         return buf;
     }
 
+    private void validateAndRedirect(HttpServletResponse response, String redirectPath) throws IOException {
+        if (SAFE_REDIRECT_PATHS.contains(redirectPath)) {
+            response.sendRedirect(redirectPath);
+        } else {
+            // Default to a safe path
+            response.sendRedirect("/");
+            logger.warn("Attempted redirect to unauthorized path: " + redirectPath);
+        }
+    }
+
     @Override
     protected void init() throws Exception {
     }
@@ -90,7 +103,7 @@ public class AuthorizationValve extends AbstractValve {
                 showLoginForm();
             } else {
                 setLogout(false);
-                response.sendRedirect(contextPath == null || contextPath.length() == 0 ? "/" : contextPath);
+                validateAndRedirect(response, contextPath == null || contextPath.length() == 0 ? "/" : contextPath);
             }
             return;
         }
