@@ -188,15 +188,36 @@ Spry.Widget.ValidationRadio.prototype.getRadios = function () {
 };
 
 Spry.Widget.ValidationRadio.prototype.addClassName = function (ele, className) {
-    if (!ele || !className || (ele.className && ele.className.search(new RegExp("\\b" + className + "\\b")) != -1))
-        return;
-    ele.className += (ele.className ? " " : "") + className;
+    if (!ele || !className || !ele.className) return;
+    
+    // Validate className to ensure it only contains safe characters
+    if (!/^[a-zA-Z0-9_-]+$/.test(className)) return;
+    
+    // Only add if not already present
+    const classes = ele.className.split(' ');
+    if (!classes.includes(className)) {
+        classes.push(className);
+        ele.className = classes.join(' ');
+    }
+};
+    // Only add if not already present
+    const classes = ele.className.split(' ');
+    if (!classes.includes(className)) {
+        classes.push(className);
+        ele.className = classes.join(' ');
+    }
 };
 
 Spry.Widget.ValidationRadio.prototype.removeClassName = function (ele, className) {
-    if (!ele || !className || (ele.className && ele.className.search(new RegExp("\\b" + className + "\\b")) == -1))
-        return;
-    ele.className = ele.className.replace(new RegExp("\\s*\\b" + className + "\\b", "g"), "");
+    if (!ele || !className || !ele.className) return;
+    
+    // Validate className to ensure it only contains safe characters
+    if (!/^[a-zA-Z0-9_-]+$/.test(className)) return;
+    
+    // Use a predefined pattern or string-based replacement
+    ele.className = ele.className.split(' ')
+        .filter(cls => cls !== className)
+        .join(' ');
 };
 
 Spry.Widget.ValidationRadio.prototype.onFocus = function (e) {
